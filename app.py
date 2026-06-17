@@ -21,6 +21,10 @@ import modules.color_names
 import modules.ai_feedback
 import modules.pdf_report
 import modules.similarity
+import auth.database
+import auth.login
+import auth.signup
+import auth.forgot_password
 
 import sys
 import importlib
@@ -37,7 +41,11 @@ for m in [
     modules.color_names,
     modules.ai_feedback,
     modules.pdf_report,
-    modules.similarity
+    modules.similarity,
+    auth.database,
+    auth.login,
+    auth.signup,
+    auth.forgot_password
 ]:
     importlib.reload(m)
 
@@ -63,6 +71,7 @@ from modules.color_names import get_color_name
 from modules.ai_feedback import generate_critique, get_fallback_critique
 from modules.pdf_report import create_report
 from modules.similarity import artwork_similarity
+from auth import init_auth_db, show_login_page, show_signup_page, show_forgot_password_page
 
 def cleanup_broken_records():
     """Detects broken image paths and deletes those records from the database."""
@@ -99,6 +108,7 @@ os.makedirs("reports", exist_ok=True)
 
 # Initialize Database
 db_init()
+init_auth_db()
 cleanup_broken_records()
 
 # Page configurations
@@ -116,8 +126,46 @@ if os.path.exists(styles_path):
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Session state initialization
+# Session state initialization
 if "active_artwork_id" not in st.session_state:
     st.session_state.active_artwork_id = None
+
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "auth_page" not in st.session_state:
+    st.session_state.auth_page = "login"
+if "user_id" not in st.session_state:
+    st.session_state.user_id = None
+if "user_name" not in st.session_state:
+    st.session_state.user_name = ""
+if "user_email" not in st.session_state:
+    st.session_state.user_email = ""
+
+# Authentication Routing
+if not st.session_state.authenticated:
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background: linear-gradient(135deg, #0F2027, #203A43, #2C5364) !important;
+            background-attachment: fixed !important;
+        }
+        div[data-testid="stForm"] {
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.session_state.auth_page == "login":
+        show_login_page()
+    elif st.session_state.auth_page == "signup":
+        show_signup_page()
+    elif st.session_state.auth_page == "forgot_password":
+        show_forgot_password_page()
+    st.stop()
 
 # Helper to draw focal point on image
 def get_image_with_focal_point(image_path, focal_point_coords):
@@ -144,14 +192,29 @@ def get_image_with_focal_point(image_path, focal_point_coords):
 # SIDEBAR NAVIGATION
 # =====================================================
 st.sidebar.markdown(
-    """
+    f"""
     <div style='text-align: center; padding: 10px 0;'>
         <h1 style='color: #1E88E5; margin-bottom: 0;'>🎨 ArtCritique AI</h1>
         <p style='font-size: 0.85em; opacity: 0.7;'>Professional Art Feedback in Seconds</p>
+        <div style='margin-top: 15px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;'>
+            <span style='font-size: 0.9em; opacity: 0.8;'>Artist Profile:</span><br/>
+            <strong style='color: #1E88E5; font-size: 1.05em;'>{st.session_state.user_name}</strong>
+        </div>
     </div>
     """,
     unsafe_allow_html=True
 )
+
+st.sidebar.divider()
+
+if st.sidebar.button("🚪 Log Out", use_container_width=True):
+    st.session_state.authenticated = False
+    st.session_state.user_id = None
+    st.session_state.user_name = ""
+    st.session_state.user_email = ""
+    st.session_state.active_artwork_id = None
+    st.session_state.auth_page = "login"
+    st.rerun()
 
 st.sidebar.divider()
 
@@ -161,7 +224,7 @@ menu = st.sidebar.selectbox(
 )
 
 # Sidebar summary stats
-averages = get_average_scores(user_id=1)
+averages = get_average_scores(user_id=st.session_state.user_id)
 st.sidebar.markdown("### User Statistics")
 st.sidebar.metric("Total Uploads", averages["total_uploads"])
 st.sidebar.metric("Average Aesthetic Score", f"{averages['avg_aesthetic']}/100")
@@ -421,7 +484,7 @@ elif current_page == "Dashboard Overview":
     st.divider()
 
     # Get dashboard stats
-    stats = get_average_scores(user_id=1)
+    stats = get_average_scores(user_id=st.session_state.user_id)
     
     if stats["total_uploads"] == 0:
         st.info("👋 Welcome! You haven't analyzed any artworks yet. Go to the **Analyze Artwork** tab to get started.")
@@ -438,7 +501,7 @@ elif current_page == "Dashboard Overview":
         
         # Chronological line charts (Trends)
         st.markdown("### 📈 Visual Skill Progression Trends")
-        trends = get_score_trends(user_id=1)
+        trends = get_score_trends(user_id=st.session_state.user_id)
         
         if len(trends) > 1:
             df_trends = pd.DataFrame(trends)
@@ -465,7 +528,7 @@ elif current_page == "Dashboard Overview":
         
         # History Gallery Grid
         st.markdown("### 🎨 Historical Artwork Gallery")
-        history = get_artwork_history(user_id=1)
+        history = get_artwork_history(user_id=st.session_state.user_id)
         
         cols_per_row = 4
         rows_count = (len(history) + cols_per_row - 1) // cols_per_row
@@ -640,7 +703,7 @@ elif current_page == "Analyze Artwork":
                         image.save(filename, format="PNG")
                         
                         artwork_id = save_analysis(
-                            user_id=1,
+                            user_id=st.session_state.user_id,
                             title=art_title,
                             image_path=filename,
                             metrics=metrics,
