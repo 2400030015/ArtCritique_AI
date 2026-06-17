@@ -1,0 +1,152 @@
+/* Custom CSS Design Tokens for AI Art Critic */
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap');
+
+/* Typography Overrides */
+html, body, [class*="css"] {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+}
+
+/* Glassmorphic Metric Cards */
+div[data-testid="stMetric"] {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 18px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+div[data-testid="stMetric"]:hover {
+    transform: translateY(-4px);
+    border-color: rgba(30, 136, 229, 0.4);
+    box-shadow: 0 10px 40px rgba(30, 136, 229, 0.15);
+    background: rgba(30, 136, 229, 0.02);
+}
+
+/* Dark Mode specific overrides (automatic fallback) */
+@media (prefers-color-scheme: light) {
+    div[data-testid="stMetric"] {
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+    div[data-testid="stMetric"]:hover {
+        background: rgba(30, 136, 229, 0.02);
+        border-color: rgba(30, 136, 229, 0.3);
+        box-shadow: 0 8px 30px rgba(30, 136, 229, 0.1);
+    }
+}
+
+/* Premium Card Wrapper */
+.premium-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: transform 0.2s ease;
+}
+
+.premium-card:hover {
+    transform: scale(1.005);
+}
+
+/* Custom badges */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-right: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-beginner {
+    background-color: rgba(244, 67, 54, 0.15);
+    color: #FF5252;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.badge-intermediate {
+    background-color: rgba(255, 152, 0, 0.15);
+    color: #FF9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.badge-advanced {
+    background-color: rgba(33, 150, 243, 0.15);
+    color: #2196F3;
+    border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.badge-professional {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+/* Sidebar Custom Styling */
+section[data-testid="stSidebar"] {
+    background-color: #0F172A !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox {
+    margin-top: 10px;
+}
+
+/* Streamlit Button Overrides */
+div.stButton > button {
+    background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 15px rgba(30, 136, 229, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+}
+
+div.stButton > button:hover {
+    background: linear-gradient(135deg, #2196F3 0%, #1E88E5 100%);
+    box-shadow: 0 6px 20px rgba(30, 136, 229, 0.45);
+    transform: translateY(-2px);
+    color: white !important;
+}
+
+div.stButton > button:active {
+    transform: translateY(0);
+}
+
+/* Download Button Specific Styling */
+div.stDownloadButton > button {
+    background: linear-gradient(135deg, #00B0FF 0%, #0091EA 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0, 176, 255, 0.3);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+div.stDownloadButton > button:hover {
+    background: linear-gradient(135deg, #40C4FF 0%, #00B0FF 100%);
+    box-shadow: 0 6px 20px rgba(0, 176, 255, 0.45);
+    transform: translateY(-2px);
+    color: white !important;
+}
